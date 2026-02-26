@@ -172,6 +172,9 @@ static int http_response_parse(int sock, char **http_response, size_t *http_resp
 
     int err;
 
+    if (http_body_size < 0)  {
+        return -1;
+    }
     if (http_body_size > size) {
         buf = realloc(buf, http_body_size);
         if (!buf) {
@@ -463,6 +466,8 @@ static void client_task_cache(void *args) {
         err = http_response_parse(ups_sock, &cache_content->buffer, &http_response_size);
         if (err != 0) {
             log_message(ERROR, "HTTP RESPONSE PARSE FAILED. IP:%s", ip_buff);
+            close(sockets.client_socket);
+            close(ups_sock);
         }
 
         time(&cache_content->time);
